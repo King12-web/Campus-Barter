@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Campus Swap — Exchange skills. Learn anything. Together.</title>
+<meta name="description" content="Campus Swap is a student-to-student platform where you trade skills, not money. Offer what you're good at. Get help with what you need." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --primary: #5B3DF5;
+    --primary-soft: #EEEBFE;
+    --ink: #1E293B;
+    --navy: #111827;
+    --muted: #6B7280;
+    --offer: #16A34A;
+    --offer-bg: #E8F7EE;
+    --need: #F97316;
+    --need-bg: #FEF0E6;
+    --bg: #F7F8FA;
+    --card: #FFFFFF;
+    --line: #E5E7EB;
+    --gold: #F5B50A;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--card);
+    color: var(--ink);
+  }
+
+  .icon {
+    width: 20px; height: 20px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    vertical-align: middle; flex-shrink: 0;
+  }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+  /* ================= NAV ================= */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 0;
+    gap: 14px;
+  }
+  .brand { display: flex; align-items: center; gap: 9px; }
+  .brand .mark {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--primary-soft); color: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand .name { font-size: 16px; font-weight: 800; letter-spacing: 0.01em; }
+  .brand .name span { color: var(--primary); }
+  .brand .tag { font-size: 10px; color: var(--muted); font-weight: 600; }
+  .brand .tag b { color: var(--offer); font-weight: 600; }
+
+  .nav-links { display: none; gap: 26px; }
+  .nav-links a {
+    font-size: 13px; font-weight: 600;
+    color: var(--ink); text-decoration: none;
+  }
+  .nav-links a:hover { color: var(--primary); }
+
+  .nav-actions { display: flex; gap: 10px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 13px; font-weight: 600;
+    padding: 11px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    border: none; cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--primary); color: #FFFFFF; }
+  .btn-outline { background: var(--card); color: var(--ink); border: 1.5px solid var(--line); }
+
+  @media (min-width: 780px) {
+    .nav-links { display: flex; }
+  }
+
+  /* ================= HERO ================= */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 44px;
+    align-items: center;
+    padding: 36px 0 64px;
+  }
+  @media (min-width: 880px) {
+    .hero { grid-template-columns: 1.05fr 1fr; }
+  }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--primary);
+    background: var(--primary-soft);
+    border-radius: 999px;
+    padding: 7px 14px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-size: clamp(36px, 5.4vw, 58px);
+    font-weight: 800;
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+  h1 .l2 { color: var(--primary); display: block; }
+  h1 .l3 { color: var(--offer); display: inline-block; position: relative; }
+  h1 .l3 svg {
+    position: absolute; left: 0; bottom: -8px; width: 100%; height: 12px;
+    stroke: var(--offer); stroke-width: 3; fill: none; stroke-linecap: round;
+  }
+
+  .lede {
+    font-size: 16px; color: var(--muted); line-height: 1.65;
+    margin-bottom: 28px; max-width: 460px;
+  }
+
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 26px; }
+  .btn-lg { padding: 14px 26px; font-size: 14px; }
+
+  .proof { display: flex; align-items: center; gap: 12px; }
+  .proof-avatars { display: flex; }
+  .proof-avatars .pa {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--card);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+    margin-left: -8px;
+  }
+  .proof-avatars .pa:first-child { margin-left: 0; }
+  .pa-0 { background: var(--primary-soft); color: var(--primary); }
+  .pa-1 { background: var(--offer-bg); color: var(--offer); }
+  .pa-2 { background: var(--need-bg); color: var(--need); }
+  .pa-3 { background: var(--line); color: var(--muted); }
+  .proof-text { font-size: 12px; color: var(--muted); line-height: 1.45; }
+  .proof-text b { color: var(--ink); }
+
+  /* ---- hero visual ---- */
+  .visual { position: relative; padding: 12px 0 34px; }
+
+  .blob {
+    position: absolute; border-radius: 50%;
+    z-index: 0;
+  }
+  .blob.b1 { width: 190px; height: 190px; background: var(--primary-soft); right: -20px; top: -8px; }
+  .blob.b2 { width: 130px; height: 130px; background: var(--offer-bg); left: -14px; bottom: 20px; }
+
+  .match-card {
+    position: relative; z-index: 1;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 20px;
+    max-width: 380px;
+    margin: 0 auto;
+    box-shadow: 0 18px 44px rgba(30, 41, 59, 0.10);
+  }
+  .mc-head {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    font-size: 13px; font-weight: 700; color: var(--primary);
+    margin-bottom: 16px;
+  }
+  .mc-people {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .mc-person { width: 42%; text-align: center; }
+  .mc-avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 800;
+    margin: 0 auto 7px;
+    position: relative;
+  }
+  .mc-avatar .dot {
+    position: absolute; right: 2px; bottom: 2px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--offer); border: 2px solid var(--card);
+  }
+  .mca-a { background: var(--primary-soft); color: var(--primary); }
+  .mca-b { background: var(--need-bg); color: var(--need); }
+  .mc-name { font-size: 13px; font-weight: 700; }
+  .mc-inst { font-size: 10px; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 8px; }
+  .mc-mid {
+    color: var(--primary);
+    background: var(--bg);
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 8px;
+  }
+  .mc-label { font-size: 10px; font-weight: 700; margin: 6px 0 4px; text-align: left; }
+  .mc-label.o { color: var(--offer); }
+  .mc-label.n { color: var(--need); }
+  .tag {
+    display: inline-block;
+    font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 999px;
+  }
+  .tag.offer { background: var(--offer-bg); color: var(--offer); }
+  .tag.need  { background: var(--need-bg);  color: var(--need); }
+  .mc-note {
+    font-size: 11px; color: var(--muted);
+    text-align: center; margin: 10px 0 14px;
+  }
+  .mc-btn {
+    display: block; width: 100%;
+    background: var(--primary); color: #FFFFFF;
+    font-size: 14px; font-weight: 700;
+    text-align: center; padding: 13px;
+    border-radius: 11px; border: none;
+  }
+
+  .toast-card {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 12px 16px;
+    max-width: 290px;
+    margin: -18px 0 0 auto;
+    box-shadow: 0 12px 30px rgba(30, 41, 59, 0.10);
+  }
+  .toast-card .bell {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--offer-bg); color: var(--offer);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .toast-card p { font-size: 12px; line-height: 1.4; }
+  .toast-card .when { font-size: 10px; color: var(--muted); }
+
+  /* ================= HOW IT WORKS ================= */
+  section { padding: 56px 0; }
+  .band { background: var(--bg); }
+
+  .how-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    align-items: start;
+  }
+  @media (min-width: 880px) {
+    .how-grid { grid-template-columns: 240px 1fr; }
+  }
+
+  .kicker {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
+    color: var(--primary); text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  h2 { font-size: clamp(22px, 3.4vw, 30px); font-weight: 800; line-height: 1.2; }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 22px;
+  }
+  .step { text-align: center; }
+  .step .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: 50%;
+    font-size: 13px; font-weight: 800;
+    margin-bottom: 12px;
+  }
+  .num-1 { background: var(--primary-soft); color: var(--primary); }
+  .num-2 { background: var(--offer-bg); color: var(--offer); }
+  .num-3 { background: var(--need-bg); color: var(--need); }
+  .num-4 { background: #FDF3D7; color: #A87908; }
+  .step .s-icon { color: var(--muted); margin-bottom: 10px; }
+  .step .s-icon .icon { width: 26px; height: 26px; }
+  .step h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .step p { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+
+  /* ================= DARK BAND ================= */
+  .dark {
+    background: var(--navy);
+    color: #FFFFFF;
+    border-radius: 20px;
+    padding: 44px 30px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 34px;
+    align-items: center;
+  }
+  @media (min-width: 880px) {
+    .dark { grid-template-columns: 250px 1fr; }
+  }
+  .dark h2 { color: #FFFFFF; }
+  .dark h2 span { color: var(--offer); }
+
+  .dark-feats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 24px;
+  }
+  .df { font-size: 12px; color: #C7CDD8; line-height: 1.55; }
+  .df .df-icon {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 10px;
+  }
+  .dfi-green  { background: var(--offer); color: #FFFFFF; }
+  .dfi-orange { background: var(--need); color: #FFFFFF; }
+  .dfi-purple { background: var(--primary); color: #FFFFFF; }
+  .dfi-gold   { background: var(--gold); color: var(--navy); }
+  .dfi-blue   { background: #2563EB; color: #FFFFFF; }
+  .df h3 { font-size: 13.5px; font-weight: 700; color: #FFFFFF; margin-bottom: 5px; }
+
+  /* ================= FAQ ================= */
+  .faq-wrap { max-width: 640px; margin: 0 auto; }
+  .faq-wrap .section-head { text-align: center; margin-bottom: 26px; }
+  details {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 10px;
+  }
+  summary {
+    font-size: 14px; font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary .icon { color: var(--muted); transition: transform 0.2s; }
+  details[open] summary .icon { transform: rotate(45deg); }
+  details p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-top: 10px; }
+
+  /* ================= FINAL CTA + FOOTER ================= */
+  .final {
+    text-align: center;
+    padding: 10px 0 30px;
+  }
+  .final h2 { margin-bottom: 8px; }
+  .final > p { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+
+  footer {
+    border-top: 1px solid var(--line);
+    text-align: center;
+    font-size: 12px; color: var(--muted);
+    padding: 26px 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <div class="brand">
+      <div class="mark">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      </div>
+      <div>
+        <p class="name">CAMPUS <span>SWAP</span></p>
+        <p class="tag">Trade skills. <b>Grow together.</b></p>
+      </div>
+    </div>
+
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="dashboard.html">Explore</a>
+      <a href="#why">Why Campus Swap</a>
+      <a href="#faq">FAQ</a>
+    </div>
+
+    <div class="nav-actions">
+      <a class="btn btn-outline" href="dashboard.html">Browse board</a>
+      <a class="btn btn-primary" href="join.html">Join the board</a>
+    </div>
+  </nav>
+
+  <!-- ================= HERO ================= -->
+  <div class="hero">
+    <div>
+      <p class="eyebrow">
+        <svg class="icon" style="width:13px;height:13px;" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        For students across Nigeria
+      </p>
+      <h1>
+        Exchange skills.
+        <span class="l2">Learn anything.</span>
+        <span class="l3">Together.
+          <svg viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M2 9 Q 50 1 98 7" /></svg>
+        </span>
+      </h1>
+      <p class="lede">
+        Campus Swap is a student-to-student platform where you trade
+        skills, not money. Offer what you're good at. Get help with
+        what you need.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary btn-lg" href="join.html">
+          Join the board
+          <svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <a class="btn btn-outline btn-lg" href="#how">
+          See how it works
+          <svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>
+        </a>
+      </div>
+      <div class="proof">
+        <div class="proof-avatars">
+          <div class="pa pa-0">AD</div><div class="pa pa-1">TK</div><div class="pa pa-2">ZK</div><div class="pa pa-3">+</div>
+        </div>
+        <p class="proof-text"><b>330+ institutions supported</b><br />every university, polytechnic and college in Nigeria</p>
+      </div>
+    </div>
+
+    <div class="visual">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+
+      <div class="match-card">
+        <p class="mc-head">
+          <svg class="icon" style="width:15px;height:15px;" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          New match for you!
+        </p>
+        <div class="mc-people">
+          <div class="mc-person">
+            <div class="mc-avatar mca-a">AM<span class="dot"></span></div>
+            <p class="mc-name">Adaeze M.</p>
+            <p class="mc-inst">UNILAG</p>
+            <p class="mc-label o">Offers</p>
+            <span class="tag offer">CV design</span>
+            <p class="mc-label n">Needs</p>
+            <span class="tag need">laptop repair</span>
+          </div>
+          <div class="mc-mid">
+            <svg class="icon" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          </div>
+          <div class="mc-person">
+            <div class="mc-avatar mca-b">TK<span class="dot"></span></div>
+            <p class="mc-name">Tunde K.</p>
+            <p class="mc-inst">UNILAG</p>
+            <p class="mc-label o">Offers</p>
+            <span class="tag offer">laptop repair</span>
+            <p class="mc-label n">Needs</p>
+            <span class="tag need">CV design</span>
+          </div>
+        </div>
+        <p class="mc-note">You both want what each other offers.</p>
+        <button class="mc-btn">Propose trade</button>
+      </div>
+
+      <div class="toast-card">
+        <div class="bell">
+          <svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <div>
+          <p><b>Moyo O. accepted</b> your trade proposal</p>
+          <p class="when">20m ago</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section class="band" id="how">
+  <div class="wrap how-grid">
+    <div>
+      <p class="kicker">How it works</p>
+      <h2>Four simple steps to swap skills</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <p class="num num-1">01</p>
+        <p class="s-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></p>
+        <h3>Create your profile</h3>
+        <p>Tell us your institution and the skills you offer and need.</p>
+      </div>
+      <div class="step">
+        <p class="num num-2">02</p>
+        <p class="s-icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></p>
+        <h3>Explore the board</h3>
+        <p>Browse students on your campus or widen the search to others.</p>
+      </div>
+      <div class="step">
+        <p class="num num-3">03</p>
+        <p class="s-icon"><svg class="icon" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></p>
+        <h3>Propose a trade</h3>
+        <p>Choose the skills you want to swap and send a proposal.</p>
+      </div>
+      <div class="step">
+        <p class="num num-4">04</p>
+        <p class="s-icon"><svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></p>
+        <h3>Trade, learn and rate</h3>
+        <p>Complete the trade and rate each other. Build trust.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DARK BAND ================= -->
+<section id="why">
+  <div class="wrap">
+    <div class="dark">
+      <h2>A better way to learn and <span>grow</span> on campus.</h2>
+      <div class="dark-feats">
+        <div class="df">
+          <div class="df-icon dfi-green">
+            <svg class="icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Student to student</h3>
+          <p>Trade directly with students at real institutions.</p>
+        </div>
+        <div class="df">
+          <div class="df-icon dfi-orange">
+            <svg class="icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9h.01M15 15h.01M20 12c0 1.38-.28 2.63-.76 3.74M4.73 4.73A9.95 9.95 0 0 0 4 12c0 5.52 3.58 8 8 8 1.44 0 2.8-.3 4-.87"/></svg>
+          </div>
+          <h3>No money involved</h3>
+          <p>Swap skills. Learn. Grow together.</p>
+        </div>
+        <div class="df">
+          <div class="df-icon dfi-purple">
+            <svg class="icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          </div>
+          <h3>Campus first</h3>
+          <p>Connect with students in your own institution first.</p>
+        </div>
+        <div class="df">
+          <div class="df-icon dfi-gold">
+            <svg class="icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Trust and reputation</h3>
+          <p>Ratings and trade history help you trade confidently.</p>
+        </div>
+        <div class="df">
+          <div class="df-icon dfi-blue">
+            <svg class="icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <h3>Remote or local</h3>
+          <p>Find skills you can get anywhere or on campus.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="band" id="faq">
+  <div class="wrap faq-wrap">
+    <div class="section-head">
+      <p class="kicker">FAQ</p>
+      <h2>Questions students ask</h2>
+    </div>
+
+    <details>
+      <summary>Is Campus Swap free?
+        <svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </summary>
+      <p>Completely. No fees, no subscriptions, no money anywhere in the app — that's the whole point. Your skills are the currency.</p>
+    </details>
+
+    <details>
+      <summary>How do we contact each other after a match?
+        <svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </summary>
+      <p>Through WhatsApp — where you already chat. Your number stays private until you accept a trade; then both of you get a chat button. Nobody can see or search your number on your profile.</p>
+    </details>
+
+    <details>
+      <summary>What if someone doesn't deliver their side?
+        <svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </summary>
+      <p>Every completed trade ends with both people rating each other, and ratings plus trade history show on every profile. Trade with people who deliver — reputations are earned, not claimed.</p>
+    </details>
+
+    <details>
+      <summary>Is my institution supported?
+        <svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </summary>
+      <p>We cover 330+ Nigerian tertiary institutions — universities, polytechnics, colleges of education and monotechnics. If yours is somehow missing, pick "Other" at sign-up and we'll add it.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ================= FINAL CTA ================= -->
+<section class="final">
+  <div class="wrap">
+    <h2>Your skills are currency.</h2>
+    <p>Join your campus board and make your first swap this week.</p>
+    <a class="btn btn-primary btn-lg" href="join.html">Get started — it's free</a>
+  </div>
+</section>
+
+<footer>Made for students, by students. Trade skills. Grow together.</footer>
+
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Campus Swap — Join the board</title>
+<style>
+  /* ==========================================================
+     CAMPUS SWAP DESIGN SYSTEM
+     Same variables as our screens reference file.
+     Every page of the app starts with this block.
+     ========================================================== */
+  :root {
+    --primary: #5B3DF5;
+    --primary-soft: #EEEBFE;
+    --ink: #1E293B;
+    --muted: #6B7280;
+    --offer: #16A34A;
+    --offer-bg: #E8F7EE;
+    --need: #F97316;
+    --need-bg: #FEF0E6;
+    --bg: #F2F4F7;
+    --card: #FFFFFF;
+    --line: #E5E7EB;
+    --danger: #EF4444;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; }
+
+  body {
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Mobile-first: the app column is capped at phone width
+     even on desktop, so it always feels like the design. */
+  .app {
+    width: 100%;
+    max-width: 420px;
+    padding: 28px 20px 40px;
+  }
+
+  .brand {
+    font-size: 15px;
+    font-weight: 800;
+    margin-bottom: 24px;
+  }
+  .brand span { color: var(--offer); }
+
+  .step-label { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  h1 { font-size: 22px; margin-bottom: 6px; }
+  .hint { font-size: 14px; color: var(--muted); margin-bottom: 22px; }
+
+  label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 6px; }
+
+  input, select {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 13px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--ink);
+  }
+  input:focus, select:focus {
+    outline: 2px solid var(--primary);
+    border-color: var(--primary);
+  }
+
+  .field-note { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .field-note.trust { color: var(--offer); font-weight: 600; }
+
+  .error {
+    font-size: 12px;
+    color: var(--danger);
+    margin-top: 6px;
+    display: none;   /* JS flips this to block when needed */
+  }
+
+  .dot-o { color: var(--offer); }
+  .dot-n { color: var(--need); }
+
+  /* live preview of skill tags as the user types */
+  .tag-preview { margin-top: 10px; min-height: 30px; }
+  .tag {
+    display: inline-block;
+    font-size: 12px; font-weight: 600;
+    padding: 4px 10px; border-radius: 999px;
+    margin: 0 5px 5px 0;
+  }
+  .tag.offer { background: var(--offer-bg); color: var(--offer); }
+  .tag.need  { background: var(--need-bg);  color: var(--need); }
+
+  .btn {
+    display: block; width: 100%;
+    text-align: center;
+    font-size: 15px; font-weight: 600;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 26px;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-ghost {
+    background: transparent; color: var(--muted);
+    margin-top: 10px; font-size: 13px;
+  }
+
+  .dots { text-align: center; margin-top: 22px; font-size: 10px; letter-spacing: 8px; color: var(--line); }
+  .dots .on { color: var(--primary); }
+
+  /* Steps: only the active one is visible.
+     JS adds/removes the .active class to move between them. */
+  .step { display: none; }
+  .step.active { display: block; }
+
+  /* success screen */
+  .success { text-align: center; padding-top: 40px; }
+  .success .big { font-size: 44px; margin-bottom: 14px; }
+  .success h1 { margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <p class="brand">CAMPUS <span>SWAP</span></p>
+
+  <!-- ================= STEP 1 : ABOUT YOU ================= -->
+  <div class="step active" id="step1">
+    <p class="step-label">Step 1 of 3</p>
+    <h1>Let's get you on the board</h1>
+    <p class="hint">This helps us connect you with students on your campus.</p>
+
+    <label for="fullName">Full name</label>
+    <input type="text" id="fullName" placeholder="e.g. Adaeze Michael" autofocus />
+    <p class="error" id="nameError">Enter your name to continue.</p>
+
+    <label for="institution">Institution</label>
+    <!-- SEARCHABLE PICKLIST — our "controlled spellings" decision,
+         now backed by the full NUC-approved universities dataset
+         (bundled in campus-swap-institutions.js, NOT fetched from
+         a third-party API at runtime — see review notes).
+         <input list="..."> + <datalist> gives native type-to-search:
+         type "lag" and the browser suggests every match. -->
+    <input type="text" id="institution" list="instList"
+           placeholder="Start typing… e.g. Lagos" autocomplete="off" />
+    <datalist id="instList"></datalist>
+    <p class="field-note">Can't find yours? Type it and pick "Other" from the suggestions.</p>
+    <p class="error" id="instError">Choose an institution from the list — your board starts there.</p>
+
+    <label for="whatsapp">WhatsApp number</label>
+    <input type="tel" id="whatsapp" placeholder="e.g. 08012345678" />
+    <p class="field-note trust"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Only shared when you accept a trade. Never on your profile.</p>
+    <p class="error" id="waError">Enter a valid number (10–14 digits).</p>
+
+    <button class="btn btn-primary" onclick="goToStep(2)">Continue</button>
+    <p class="dots"><span class="on">●</span>●●</p>
+  </div>
+
+  <!-- ================= STEP 2 : SKILLS YOU OFFER ================= -->
+  <div class="step" id="step2">
+    <p class="step-label">Step 2 of 3</p>
+    <h1>What can you do? <span class="dot-o">●</span></h1>
+    <p class="hint">List skills you can offer other students. Separate with commas.</p>
+
+    <label for="offersInput">Skills you offer</label>
+    <input type="text" id="offersInput" placeholder="e.g. CV design, maths tutoring" oninput="previewTags('offersInput','offersPreview','offer')" />
+    <div class="tag-preview" id="offersPreview"></div>
+    <p class="error" id="offersError">Add at least one skill — everyone brings something.</p>
+
+    <button class="btn btn-primary" onclick="goToStep(3)">Continue</button>
+    <button class="btn btn-ghost" onclick="goToStep(1)">‹ Back</button>
+    <p class="dots">●<span class="on">●</span>●</p>
+  </div>
+
+  <!-- ================= STEP 3 : SKILLS YOU NEED ================= -->
+  <div class="step" id="step3">
+    <p class="step-label">Step 3 of 3</p>
+    <h1>What do you need? <span class="dot-n">●</span></h1>
+    <p class="hint">Skills you're looking for. This is how matches find you. (Optional — you can add later.)</p>
+
+    <label for="needsInput">Skills you need</label>
+    <input type="text" id="needsInput" placeholder="e.g. laptop repair, public speaking" oninput="previewTags('needsInput','needsPreview','need')" />
+    <div class="tag-preview" id="needsPreview"></div>
+
+    <button class="btn btn-primary" onclick="finishOnboarding()">Join the board</button>
+    <button class="btn btn-ghost" onclick="goToStep(2)">‹ Back</button>
+    <p class="dots">●●<span class="on">●</span></p>
+  </div>
+
+  <!-- ================= SUCCESS ================= -->
+  <div class="step" id="stepDone">
+    <div class="success">
+      <p class="big"><svg viewBox="0 0 24 24" style="width:52px;height:52px;stroke:#16A34A;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></p>
+      <h1>You're on the board!</h1>
+      <p class="hint" id="welcomeLine"></p>
+      <button class="btn btn-primary" onclick="window.location.href='dashboard.html'">Go to your board ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- The institutions dataset — must load BEFORE the main script
+     below uses the INSTITUTIONS array. Keep both files in the
+     same folder. -->
+<script src="institution.js"></script>
+
+<script>
+  /* ============================================================
+     STATE
+     ------------------------------------------------------------
+     This page's only job: build ONE object — the current user —
+     and save it as "currentUser" in localStorage.
+
+     THE DUPLICATE FIX from Phase 1 lives here too, upgraded:
+     in the real product you don't "add people" repeatedly —
+     you create YOUR profile once. If a profile already exists,
+     we skip onboarding entirely. One device = one profile.
+     Phase 4 (accounts) makes this bulletproof.
+     ============================================================ */
+
+  window.onload = function () {
+    /* Fill the datalist from the bundled INSTITUTIONS array.
+       "Other" is added at the end as the official escape hatch —
+       those entries get reviewed and added to the real list later. */
+    let listHTML = "";
+    for (let i = 0; i < INSTITUTIONS.length; i++) {
+      listHTML += "<option value=\"" + INSTITUTIONS[i] + "\"></option>";
+    }
+    listHTML += "<option value=\"Other\"></option>";
+    document.getElementById("instList").innerHTML = listHTML;
+
+    let existing = localStorage.getItem("currentUser");
+    if (existing !== null) {
+      let user = JSON.parse(existing);
+      welcomeLine.textContent = "Welcome back, " + user.name.split(" ")[0] + " — you're already set up.";
+      showOnly("stepDone");
+    }
+  };
+
+  /* Same helper as Phase 1 — split, clean, drop empties. */
+  function textToSkillArray(text) {
+    return text
+      .split(",")
+      .map(function (s) { return s.trim().toLowerCase(); })
+      .filter(function (s) { return s.length > 0; });
+  }
+
+  /* ============================================================
+     LIVE TAG PREVIEW
+     ------------------------------------------------------------
+     Runs on every keystroke (oninput). Converts the text to
+     a skill array and renders it as tags immediately, so users
+     SEE that commas create separate skills. Small touch,
+     big clarity win.
+     ============================================================ */
+  function previewTags(inputId, previewId, tagClass) {
+    let skills = textToSkillArray(document.getElementById(inputId).value);
+    document.getElementById(previewId).innerHTML = skills
+      .map(function (s) { return '<span class="tag ' + tagClass + '">' + s + "</span>"; })
+      .join("");
+  }
+
+  function showOnly(stepId) {
+    let steps = document.querySelectorAll(".step");
+    for (let i = 0; i < steps.length; i++) {
+      steps[i].classList.remove("active");
+    }
+    document.getElementById(stepId).classList.add("active");
+    window.scrollTo(0, 0);
+  }
+
+  function hideErrors() {
+    let errs = document.querySelectorAll(".error");
+    for (let i = 0; i < errs.length; i++) errs[i].style.display = "none";
+  }
+
+  /* ============================================================
+     STEP VALIDATION
+     ------------------------------------------------------------
+     Each forward move validates ONLY its own step. Errors show
+     inline next to the field (no more alert() boxes — real
+     products don't alert, they guide).
+     ============================================================ */
+  function goToStep(n) {
+    hideErrors();
+
+    if (n === 2) {
+      // leaving step 1 → validate name, institution, whatsapp
+      let ok = true;
+
+      if (fullName.value.trim().length < 2) {
+        nameError.style.display = "block";
+        ok = false;
+      }
+      /* THE WHOLE POINT of the picklist: the typed value must be
+         a real entry from our dataset (or "Other"). A datalist
+         SUGGESTS but doesn't ENFORCE — users can still type
+         "Univarsity of Lagos" — so we enforce it ourselves here.
+         .includes() checks if an array contains a value. */
+      let instValue = institution.value.trim();
+      if (instValue === "" ||
+          (INSTITUTIONS.includes(instValue) === false && instValue !== "Other")) {
+        instError.style.display = "block";
+        ok = false;
+      }
+
+      // Keep only digits, then length-check. This accepts
+      // "0801 234 5678" or "+2348012345678" and normalizes both.
+      let digits = whatsapp.value.replace(/\D/g, "");
+      if (digits.length < 10 || digits.length > 14) {
+        waError.style.display = "block";
+        ok = false;
+      }
+
+      if (!ok) return;   // stay on step 1 until it's right
+    }
+
+    if (n === 3) {
+      // leaving step 2 → at least one offered skill
+      if (textToSkillArray(offersInput.value).length === 0) {
+        offersError.style.display = "block";
+        return;
+      }
+    }
+
+    showOnly("step" + n);
+  }
+
+  function finishOnboarding() {
+    let digits = whatsapp.value.replace(/\D/g, "");
+
+    let currentUser = {
+      name: fullName.value.trim(),
+      institution: institution.value,
+      whatsapp: digits,                              // PRIVATE — never rendered on cards
+      offers: textToSkillArray(offersInput.value),
+      needs: textToSkillArray(needsInput.value),     // may be empty — that's allowed
+      rating: null,                                  // no trades yet
+      trades: 0,
+      joined: new Date().toISOString()
+    };
+
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+    welcomeLine.textContent =
+      currentUser.name.split(" ")[0] +
+      ", your board at " + currentUser.institution + " is waiting.";
+    showOnly("stepDone");
+  }
+</script>
+</body>
+</html>
