@@ -238,8 +238,8 @@
 <div class="app">
 
   <div class="appbar">
-    <button class="iconbtn" aria-label="Menu">
-      <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    <button class="iconbtn" id="signOutBtn" aria-label="Sign out" onclick="handleSignOut()" style="display: none;">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     </button>
 
     <!-- Institution switcher: tap to reveal the select -->
@@ -297,44 +297,19 @@
   </div>
 </div>
 
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/db.js"></script>
 <script>
   /* ============================================================
-     DEMO DATA
+     REAL DATA
      ------------------------------------------------------------
-     Until Phase 4 (real backend), the board is seeded with demo
-     people. Institution values are EXACT spellings from our
-     dataset — that discipline is what makes filtering work.
+     DEMO_PEOPLE is retired. The board now fetches real profiles
+     from Firestore via db.js. PEOPLE starts empty and fills in
+     once the fetch completes — this is why render() must handle
+     "still loading" and "loaded but empty" as different states.
      ============================================================ */
-  const DEMO_PEOPLE = [
-    { name: "Tunde K.",  institution: "University of Lagos",
-      offers: ["laptop repair", "phone repair"],
-      needs:  ["cv design", "graphics design"],
-      rating: 4.7, trades: 9 },
-    { name: "Zainab K.", institution: "University of Lagos",
-      offers: ["maths tutoring", "writing"],
-      needs:  ["graphics design", "public speaking"],
-      rating: 4.6, trades: 9 },
-    { name: "Moyo O.",   institution: "University of Lagos",
-      offers: ["graphics design", "video editing"],
-      needs:  ["maths tutoring"],
-      rating: 4.9, trades: 7 },
-    { name: "Chika E.",  institution: "University of Ibadan",
-      offers: ["ui and ux design", "figma tutoring"],
-      needs:  ["python help", "cv design"],
-      rating: 5.0, trades: 3 },
-    { name: "Emeka O.",  institution: "University of Nigeria, Nsukka",
-      offers: ["photography", "photo editing"],
-      needs:  ["cv design"],
-      rating: 4.4, trades: 5 },
-    { name: "Fatima S.", institution: "Ahmadu Bello University, Zaria",
-      offers: ["makeup", "fashion illustration"],
-      needs:  ["excel tutoring"],
-      rating: 4.8, trades: 6 },
-    { name: "Seyi A.",   institution: "Lagos State University, Ojo",
-      offers: ["barbing", "fitness coaching"],
-      needs:  ["writing"],
-      rating: 4.2, trades: 4 }
-  ];
+  let PEOPLE = [];
+  let dataLoaded = false;
 
   /* Skills that require being physically present.
      TEMPORARY: in Phase 3, skill CATEGORIES carry a remote flag
@@ -360,19 +335,18 @@
     if (stored !== null) {
       currentUser = JSON.parse(stored);
       viewInstitution = currentUser.institution;
+      document.getElementById("signOutBtn").style.display = "";
     } else {
-      /* No onboarding done on this device: show the board
-         read-only with a banner, defaulting to UNILAG. */
+      /* No profile on this device: browse read-only, defaulting
+         to UNILAG until real data tells us otherwise. */
       viewInstitution = "University of Lagos";
       document.getElementById("profileBanner").innerHTML =
         '<div class="banner">You are browsing as a guest. ' +
-        'Open the onboarding page (join.html) to join the board.</div>';
+        'Open the onboarding page (join.html) to join the board, ' +
+        'or <a href="signin.html" style="color:inherit;">sign in</a> if you already have.</div>';
     }
 
-    /* signin.html flags an unverified sign-in with ?verify=1.
-       Friendly reminder, not a wall: they can still browse.
-       Trade actions will enforce verification once the
-       Trades page exists. */
+    /* signin.html flags an unverified sign-in with ?verify=1. */
     if (new URLSearchParams(window.location.search).get("verify") === "1") {
       document.getElementById("profileBanner").innerHTML +=
         '<div class="banner verify-banner">' +
@@ -382,9 +356,50 @@
         '</div>';
     }
 
-    buildSwitcher();
-    render();
+    loadRealPeople();
   };
+
+  /* ============================================================
+     LOADING REAL PEOPLE
+     ------------------------------------------------------------
+     Waits for db.js to finish connecting (it's a module, loads
+     async), then fetches. "All campuses" pulls everyone; a
+     specific campus pulls just that institution — smaller,
+     faster fetch for the common case.
+     ============================================================ */
+  function loadRealPeople() {
+    if (window.CBDb === undefined) {
+      /* engine not ready yet: try again shortly rather than
+         showing a permanent empty board */
+      setTimeout(loadRealPeople, 200);
+      return;
+    }
+
+    let fetchPromise = viewInstitution === "__ALL__"
+      ? CBDb.getAllProfiles()
+      : CBDb.getProfilesByInstitution(viewInstitution);
+
+    fetchPromise.then(function (result) {
+      dataLoaded = true;
+      if (result.ok) {
+        PEOPLE = result.data;
+      } else {
+        PEOPLE = [];
+        console.error("Failed to load profiles:", result.message);
+      }
+      buildSwitcher();
+      render();
+    });
+  }
+
+  /* ---- sign out ---- */
+  function handleSignOut() {
+    if (window.CBAuth === undefined) return;
+    CBAuth.signOutUser().then(function () {
+      localStorage.removeItem("currentUser");
+      window.location.href = "index.html";
+    });
+  }
 
   /* ============================================================
      INSTITUTION SWITCHER
@@ -394,27 +409,36 @@
      boards — in Phase 4 the backend returns campuses with
      member counts instead).
      ============================================================ */
+  /* ============================================================
+     INSTITUTION SWITCHER
+     ------------------------------------------------------------
+     Deliberately does NOT scan PEOPLE for "campuses with people":
+     PEOPLE only holds whichever single campus (or "all") is
+     currently loaded, so that list would shrink to just the
+     current view. Instead we offer "my campus" + "all campuses"
+     + a manual re-type via the institution field on join. A
+     campus-with-member-counts list is a nice Phase 5 addition
+     once we have a lightweight way to query it (a counts
+     document, rather than fetching everyone to count them).
+     ============================================================ */
   function buildSwitcher() {
     let sel = document.getElementById("instSelect");
-    let campusesWithPeople = [];
-    for (let i = 0; i < DEMO_PEOPLE.length; i++) {
-      let inst = DEMO_PEOPLE[i].institution;
-      if (campusesWithPeople.includes(inst) === false) {
-        campusesWithPeople.push(inst);
-      }
-    }
-    campusesWithPeople.sort();
-
     let html = "";
+
     if (currentUser !== null) {
       html += '<option value="' + currentUser.institution + '">My campus — ' +
               currentUser.institution + "</option>";
     }
     html += '<option value="__ALL__">All campuses (wider search)</option>';
-    for (let i = 0; i < campusesWithPeople.length; i++) {
-      html += '<option value="' + campusesWithPeople[i] + '">' +
-              campusesWithPeople[i] + "</option>";
+
+    /* if we're currently viewing some OTHER specific campus
+       (picked earlier in the session), keep it in the list so
+       the dropdown doesn't silently lose the current selection */
+    if (viewInstitution !== "__ALL__" &&
+        (currentUser === null || viewInstitution !== currentUser.institution)) {
+      html += '<option value="' + viewInstitution + '">' + viewInstitution + "</option>";
     }
+
     sel.innerHTML = html;
     sel.value = viewInstitution;
   }
@@ -430,7 +454,13 @@
     let away = currentUser === null || value !== currentUser.institution;
     remoteOnly = away;
     document.getElementById("instSelect").classList.remove("open");
-    render();
+
+    /* switching campus means the old PEOPLE list is for the
+       WRONG campus now — re-fetch rather than filter stale data */
+    dataLoaded = false;
+    PEOPLE = [];
+    render();          /* shows the loading state immediately */
+    loadRealPeople();  /* then replaces it with real data */
   }
 
   function toggleRemote() {
@@ -496,12 +526,28 @@
     document.getElementById("instLabel").textContent =
       viewingAll ? "All campuses" : viewInstitution;
 
+    /* LOADING STATE: the fetch hasn't resolved yet. Show a
+       calm placeholder instead of a flash of "no one here". */
+    if (dataLoaded === false) {
+      document.getElementById("matchSection").innerHTML = "";
+      document.getElementById("peopleTitle").innerHTML = "Loading the board...";
+      document.getElementById("peopleList").innerHTML =
+        '<div class="empty">' +
+        '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>' +
+        "<p>Fetching students from your campus...</p></div>";
+      document.getElementById("filterRow").innerHTML = "";
+      return;
+    }
+
     /* ---- pick the people to show ---- */
     let hiddenSkillCount = 0;
     let visible = [];
 
-    for (let i = 0; i < DEMO_PEOPLE.length; i++) {
-      let p = DEMO_PEOPLE[i];
+    for (let i = 0; i < PEOPLE.length; i++) {
+      let p = PEOPLE[i];
+
+      /* never show yourself in your own board of trade partners */
+      if (currentUser !== null && p.email === currentUser.email) continue;
 
       if (viewingAll === false && p.institution !== viewInstitution) continue;
 
@@ -584,10 +630,13 @@
     let list = document.getElementById("peopleList");
 
     if (visible.length === 0) {
+      let emptyMsg = viewingAway
+        ? "No one to show here yet. Try another campus, clear filters, or check back soon."
+        : "Your campus board is quiet right now. Share Campus Barter with friends to get it started.";
       list.innerHTML =
         '<div class="empty">' +
         '<svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
-        "<p>No one to show here yet. Try another campus, clear filters, or invite friends to join.</p></div>";
+        "<p>" + emptyMsg + "</p></div>";
       return;
     }
 
@@ -602,7 +651,8 @@
             "<div>" +
               '<p class="name">' + p.name + "</p>" +
               '<p class="meta">' + p.institution + " &middot; " + starIcon() + " " +
-              p.rating.toFixed(1) + " &middot; " + p.trades + " trades</p>" +
+              (p.rating === null || p.rating === undefined ? "New" : p.rating.toFixed(1)) +
+              " &middot; " + (p.trades || 0) + " trades</p>" +
             "</div>" +
           "</div>" +
           '<p class="tag-label o">Offers</p>' + tagsHTML(visible[i].shownOffers, "offer") +
