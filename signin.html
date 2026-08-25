@@ -244,6 +244,7 @@
 </div>
 
 <script type="module" src="js/auth.js"></script>
+<script type="module" src="js/db.js"></script>
 <script>
   /* ============================================================
      SIGN-IN (now REAL)
@@ -276,7 +277,7 @@
   }
 
   function engineReady() {
-    if (window.CBAuth === undefined) {
+    if (window.CBAuth === undefined || window.CBDb === undefined) {
       notify("Still connecting. Give it a second and try again.");
       return false;
     }
@@ -311,10 +312,32 @@
       return;
     }
 
-    /* gentle nudge, not a wall: unverified accounts still get in,
-       but hear about it. Pages can tighten this later. */
+    /* THE FIRESTORE MOMENT: fetch the real profile from the
+       cloud (not whatever happens to be sitting in this
+       device's localStorage) and use it as the working copy.
+       This is what makes sign-in work identically on any device. */
+    btn.textContent = "Loading your profile...";
+    let profileResult = await CBDb.getProfile(result.user.uid);
+
+    if (profileResult.ok && profileResult.data !== null) {
+      let currentUser = Object.assign({ uid: result.user.uid }, profileResult.data);
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    } else {
+      /* Account exists but no cloud profile found (e.g. it was
+         created before Firestore was wired in). Don't block
+         sign-in over it; the dashboard already handles a
+         missing profile gracefully with its guest banner. */
+      localStorage.removeItem("currentUser");
+    }
+
+    /* Lenient sign-in: unverified users still get in (browsing the
+       board isn't a trust-sensitive action). We flag it so the
+       dashboard can show a reminder banner instead of staying
+       silent about it. Trade actions will enforce verification
+       later, when the Trades page exists. */
     if (result.user.emailVerified === false) {
-      /* continue, but the dashboard can remind them */
+      window.location.href = "dashboard.html?verify=1";
+      return;
     }
 
     window.location.href = "dashboard.html";

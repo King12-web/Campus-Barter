@@ -2025,6 +2025,7 @@ const INSTITUTION_NAMES = INSTITUTIONS.map(function (i) { return i.name; });
 
 </script>
 <script type="module" src="js/auth.js"></script>
+<script type="module" src="js/db.js"></script>
 <script>
   /* ============================================================
      STATE
@@ -2233,8 +2234,8 @@ const INSTITUTION_NAMES = INSTITUTIONS.map(function (i) { return i.name; });
     errBox.style.display = "none";
 
     /* the engine is a module and loads async; guard against
-       a very fast finger beating it */
-    if (window.CBAuth === undefined) {
+       a very fast finger beating either engine */
+    if (window.CBAuth === undefined || window.CBDb === undefined) {
       errBox.textContent = "Still connecting. Give it a second and try again.";
       errBox.style.display = "block";
       return;
@@ -2258,11 +2259,13 @@ const INSTITUTION_NAMES = INSTITUTIONS.map(function (i) { return i.name; });
       return;
     }
 
-    /* account exists; now the profile */
+    /* account exists; now the profile.
+       uid is not stored INSIDE the profile fields (it IS the
+       document's own name in Firestore), but we keep it in the
+       localStorage copy for quick local lookups. */
     let digits = whatsapp.value.replace(/\D/g, "");
 
-    let currentUser = {
-      uid: result.user.uid,                          /* Firebase's permanent id for this account */
+    let profile = {
       name: fullName.value.trim(),
       email: email.value.trim().toLowerCase(),
       institution: institution.value.trim(),
@@ -2275,6 +2278,17 @@ const INSTITUTION_NAMES = INSTITUTIONS.map(function (i) { return i.name; });
       /* password deliberately NOT here: Firebase holds it, we never do */
     };
 
+    btn.textContent = "Saving your profile...";
+    let saveResult = await CBDb.saveProfile(result.user.uid, profile);
+
+    if (saveResult.ok === false) {
+      /* Account exists in Firebase even if this save failed —
+         don't strand the user. Keep them moving; the profile
+         still lives locally and can be retried/synced later. */
+      console.error("Cloud profile save failed:", saveResult.message);
+    }
+
+    let currentUser = Object.assign({ uid: result.user.uid }, profile);
     localStorage.setItem("currentUser", JSON.stringify(currentUser));
 
     welcomeLine.textContent =
