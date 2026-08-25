@@ -179,6 +179,15 @@
     display: none;
   }
 
+  /* honeypot: off-screen, invisible, untouchable by real users */
+  .hp-field {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+  }
+
   .tag-preview { margin-top: 10px; min-height: 30px; }
   .tag {
     display: inline-block;
@@ -223,7 +232,7 @@
       </span>
       <span class="brand-name">Campus <span>Barter</span></span>
     </a>
-    <p class="topbar-note">Already on the board? <a href="#" aria-disabled="true">Sign in</a></p>
+    <p class="topbar-note">Already on the board? <a href="signin.html">Sign in</a></p>
   </div>
 </header>
 
@@ -241,6 +250,14 @@
       <label for="fullName">Full name</label>
       <input type="text" id="fullName" placeholder="e.g. Adaeze Michael" autofocus />
       <p class="error" id="nameError">Enter your name to continue.</p>
+
+      <!-- HONEYPOT: invisible to humans (CSS hides it), but dumb bots
+           auto-fill every field they find. A filled website field means
+           a bot is submitting. Never remove the CSS that hides this. -->
+      <div class="hp-field" aria-hidden="true">
+        <label for="website">Website</label>
+        <input type="text" id="website" tabindex="-1" autocomplete="off" />
+      </div>
 
       <label for="email">Email address</label>
       <input type="email" id="email" placeholder="e.g. adaeze@gmail.com" autocomplete="email" />
@@ -322,7 +339,8 @@
       <input type="text" id="needsInput" placeholder="e.g. laptop repair, public speaking" oninput="previewTags('needsInput','needsPreview','need')" />
       <div class="tag-preview" id="needsPreview"></div>
 
-      <button class="btn btn-yellow" onclick="finishOnboarding()">Join the board</button>
+      <button class="btn btn-yellow" id="joinBtn" onclick="finishOnboarding()">Join the board</button>
+      <p class="error" id="signupError" style="margin-top: 12px;"></p>
       <button class="btn btn-ghost" onclick="goToStep(3)">Back</button>
     </div>
 
@@ -2006,6 +2024,7 @@ const INSTITUTIONS = [
 const INSTITUTION_NAMES = INSTITUTIONS.map(function (i) { return i.name; });
 
 </script>
+<script type="module" src="js/auth.js"></script>
 <script>
   /* ============================================================
      STATE
@@ -2136,6 +2155,13 @@ const INSTITUTION_NAMES = INSTITUTIONS.map(function (i) { return i.name; });
     hideErrors();
 
     if (n === 2 && currentStep === 1) {
+      /* HONEYPOT CHECK: a real human cannot see or reach this field.
+         If it's filled, a bot did it. We stop silently: no error
+         message, because telling bots they were caught teaches them. */
+      if (document.getElementById("website").value !== "") {
+        return;
+      }
+
       let ok = true;
 
       if (fullName.value.trim().length < 2) {
@@ -2193,10 +2219,50 @@ const INSTITUTION_NAMES = INSTITUTIONS.map(function (i) { return i.name; });
     showOnly("step" + n);
   }
 
-  function finishOnboarding() {
+  async function finishOnboarding() {
+    /* ============================================================
+       THE WIRING MOMENT: this now creates a REAL account.
+       1. CBAuth.signUp() asks Firebase to create the account
+          (and it sends the verification email automatically)
+       2. Only on success do we build and save the local profile
+       Firestore (profiles in the cloud) is the next milestone;
+       until then the profile still lives in localStorage.
+       ============================================================ */
+    let btn = document.getElementById("joinBtn");
+    let errBox = document.getElementById("signupError");
+    errBox.style.display = "none";
+
+    /* the engine is a module and loads async; guard against
+       a very fast finger beating it */
+    if (window.CBAuth === undefined) {
+      errBox.textContent = "Still connecting. Give it a second and try again.";
+      errBox.style.display = "block";
+      return;
+    }
+
+    /* async UX rule: a button doing server work must say so
+       and refuse double-clicks */
+    btn.disabled = true;
+    btn.textContent = "Creating your account...";
+
+    let result = await CBAuth.signUp(
+      email.value.trim().toLowerCase(),
+      password.value
+    );
+
+    if (result.ok === false) {
+      btn.disabled = false;
+      btn.textContent = "Join the board";
+      errBox.textContent = result.message;
+      errBox.style.display = "block";
+      return;
+    }
+
+    /* account exists; now the profile */
     let digits = whatsapp.value.replace(/\D/g, "");
 
     let currentUser = {
+      uid: result.user.uid,                          /* Firebase's permanent id for this account */
       name: fullName.value.trim(),
       email: email.value.trim().toLowerCase(),
       institution: institution.value.trim(),
@@ -2206,14 +2272,15 @@ const INSTITUTION_NAMES = INSTITUTIONS.map(function (i) { return i.name; });
       rating: null,
       trades: 0,
       joined: new Date().toISOString()
-      /* password deliberately NOT here. See security note above. */
+      /* password deliberately NOT here: Firebase holds it, we never do */
     };
 
     localStorage.setItem("currentUser", JSON.stringify(currentUser));
 
     welcomeLine.textContent =
       currentUser.name.split(" ")[0] +
-      ", your board at " + currentUser.institution + " is waiting.";
+      ", we sent a verification link to your email. Verify it, then your board at " +
+      currentUser.institution + " is waiting.";
     showOnly("stepDone");
   }
 </script>

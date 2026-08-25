@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Campus Barter | Sign in</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  /* ==========================================================
+     CAMPUS BARTER DESIGN SYSTEM (Whitepace language)
+     Sibling of join.html. Same vocabulary, same room.
+     ========================================================== */
+  :root {
+    --navy: #043873;
+    --navy-deep: #032B57;
+    --blue: #4F9CF9;
+    --yellow: #FFE492;
+    --yellow-deep: #FFD966;
+    --ink: #212529;
+    --muted: #5B6470;
+    --soft: #F7FAFD;
+    --card: #FFFFFF;
+    --line: #E3E9F0;
+    --danger: #E11D48;
+    --offer: #16A34A;
+    --offer-bg: #E8F7EE;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; }
+
+  body {
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--soft);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  h1, .btn, .brand-name { font-family: "DM Sans", "Inter", sans-serif; }
+
+  .icon {
+    width: 20px; height: 20px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    vertical-align: middle; flex-shrink: 0;
+  }
+
+  /* ================= FIXED TOPBAR ================= */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: var(--navy);
+    color: #FFFFFF;
+    z-index: 100;
+    box-shadow: 0 2px 14px rgba(3, 43, 87, 0.35);
+  }
+  .topbar-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FFFFFF; }
+  .brand .mark {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--yellow); color: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand-name { font-size: 16px; font-weight: 800; white-space: nowrap; }
+  .brand-name span { color: var(--yellow); }
+  .topbar-note { font-size: 12.5px; color: #B9CCE6; }
+  .topbar-note a { color: var(--yellow); text-decoration: none; font-weight: 600; }
+
+  /* ================= CARD ================= */
+  .page {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 100px 20px 50px;
+  }
+
+  .form-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    box-shadow: 0 14px 34px rgba(4, 56, 115, 0.08);
+  }
+
+  .greet-icon {
+    width: 46px; height: 46px; border-radius: 12px;
+    background: var(--yellow); color: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  h1 { font-size: 23px; font-weight: 800; margin-bottom: 8px; }
+  .hint { font-size: 13.5px; color: var(--muted); line-height: 1.6; margin-bottom: 6px; }
+
+  label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 6px; }
+
+  .field { position: relative; }
+
+  input {
+    width: 100%;
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 13px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--ink);
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(79, 156, 249, 0.18);
+  }
+
+  .peek {
+    position: absolute;
+    right: 10px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: var(--muted);
+    padding: 4px;
+  }
+
+  .error {
+    font-size: 12px;
+    color: var(--danger);
+    margin-top: 6px;
+    display: none;
+  }
+
+  .forgot {
+    display: block;
+    text-align: right;
+    font-size: 12.5px; font-weight: 600;
+    color: var(--blue);
+    text-decoration: none;
+    margin-top: 10px;
+  }
+
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    width: 100%;
+    font-size: 14px; font-weight: 700;
+    padding: 14px;
+    border-radius: 10px;
+    border: none; cursor: pointer;
+    margin-top: 22px;
+  }
+  .btn-navy { background: var(--navy); color: #FFFFFF; }
+
+  /* the honest notice for accounts we can't verify yet */
+  .notice {
+    display: none;
+    background: var(--soft);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.65;
+    margin-top: 18px;
+  }
+  .notice.show { display: block; }
+  .notice b { color: var(--ink); }
+  .notice a { color: var(--blue); font-weight: 600; text-decoration: none; }
+
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 22px 0 0;
+    font-size: 12px; color: var(--muted);
+  }
+  .divider::before, .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .join-link {
+    display: block;
+    text-align: center;
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-top: 16px;
+  }
+  .join-link a { color: var(--blue); font-weight: 700; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <span class="mark">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      </span>
+      <span class="brand-name">Campus <span>Barter</span></span>
+    </a>
+    <p class="topbar-note">New here? <a href="join.html">Join the board</a></p>
+  </div>
+</header>
+
+<div class="page">
+  <div class="form-card">
+
+    <div class="greet-icon">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+
+    <h1>Welcome back to the board</h1>
+    <p class="hint">Sign in to see your matches and trades.</p>
+
+    <label for="email">Email address</label>
+    <input type="email" id="email" placeholder="e.g. adaeze@gmail.com" autocomplete="email" autofocus />
+    <p class="error" id="emailError">Enter a valid email address.</p>
+
+    <label for="password">Password</label>
+    <div class="field">
+      <input type="password" id="password" placeholder="Your password" autocomplete="current-password" />
+      <button type="button" class="peek" onclick="togglePassword('password')" aria-label="Show or hide password">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <p class="error" id="passError">Enter your password.</p>
+
+    <!-- Placeholder: password reset arrives with the auth system -->
+    <a class="forgot" href="#" onclick="forgotPassword(); return false;">Forgot password?</a>
+
+    <button class="btn btn-navy" id="signinBtn" onclick="signIn()">Sign in</button>
+
+    <div class="notice" id="notice"></div>
+
+    <div class="divider">or</div>
+    <p class="join-link">Don't have an account yet? <a href="join.html">Join the board free</a></p>
+
+  </div>
+</div>
+
+<script type="module" src="js/auth.js"></script>
+<script>
+  /* ============================================================
+     SIGN-IN (now REAL)
+     ------------------------------------------------------------
+     The shell has its soul: CBAuth.signIn() checks credentials
+     against Firebase, so signing in works from ANY device.
+     Forgot password now sends a real reset email too.
+
+     One honest gap until the Firestore milestone: on a brand-new
+     device the account signs in fine, but the PROFILE (skills,
+     institution) still lives only where it was created. Cloud
+     profiles are the next build.
+     ============================================================ */
+
+  function togglePassword(fieldId) {
+    let field = document.getElementById(fieldId);
+    field.type = field.type === "password" ? "text" : "password";
+  }
+
+  function hideErrors() {
+    let errs = document.querySelectorAll(".error");
+    for (let i = 0; i < errs.length; i++) errs[i].style.display = "none";
+    document.getElementById("notice").classList.remove("show");
+  }
+
+  function notify(message) {
+    let box = document.getElementById("notice");
+    box.innerHTML = message;
+    box.classList.add("show");
+  }
+
+  function engineReady() {
+    if (window.CBAuth === undefined) {
+      notify("Still connecting. Give it a second and try again.");
+      return false;
+    }
+    return true;
+  }
+
+  async function signIn() {
+    hideErrors();
+
+    let ok = true;
+    let emailValue = email.value.trim().toLowerCase();
+    let emailShape = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (emailShape.test(emailValue) === false) {
+      emailError.style.display = "block"; ok = false;
+    }
+    if (password.value.length === 0) {
+      passError.style.display = "block"; ok = false;
+    }
+    if (!ok || !engineReady()) return;
+
+    let btn = document.getElementById("signinBtn");
+    btn.disabled = true;
+    btn.textContent = "Signing you in...";
+
+    let result = await CBAuth.signIn(emailValue, password.value);
+
+    if (result.ok === false) {
+      btn.disabled = false;
+      btn.textContent = "Sign in";
+      notify("<b>Couldn't sign you in.</b> " + result.message);
+      return;
+    }
+
+    /* gentle nudge, not a wall: unverified accounts still get in,
+       but hear about it. Pages can tighten this later. */
+    if (result.user.emailVerified === false) {
+      /* continue, but the dashboard can remind them */
+    }
+
+    window.location.href = "dashboard.html";
+  }
+
+  async function forgotPassword() {
+    hideErrors();
+
+    let emailValue = email.value.trim().toLowerCase();
+    let emailShape = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (emailShape.test(emailValue) === false) {
+      emailError.style.display = "block";
+      notify("Type your email above first, then tap Forgot password again.");
+      return;
+    }
+    if (!engineReady()) return;
+
+    let result = await CBAuth.resetPassword(emailValue);
+
+    if (result.ok) {
+      notify("<b>Reset email sent to " + emailValue + ".</b> " +
+             "Check your inbox (and spam folder), follow the link, " +
+             "then come back and sign in.");
+    } else {
+      notify("<b>Couldn't send the reset email.</b> " + result.message);
+    }
+  }
+</script>
+</body>
+</html>
