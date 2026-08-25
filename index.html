@@ -63,15 +63,6 @@
   .brand .tag { font-size: 10px; color: var(--muted); font-weight: 600; }
   .brand .tag b { color: var(--offer); font-weight: 600; }
 
-  /* Small screens: nav shows brand only — the hero carries the CTAs.
-     Hero buttons go full-width, stacked, thumb-friendly. */
-  @media (max-width: 620px) {
-    .brand .tag { display: none; }
-    .nav-actions { display: none; }
-    .cta-row { flex-direction: column; }
-    .cta-row .btn { width: 100%; }
-  }
-
   .nav-links { display: none; gap: 26px; }
   .nav-links a {
     font-size: 13px; font-weight: 600;
@@ -94,6 +85,18 @@
 
   @media (min-width: 780px) {
     .nav-links { display: flex; }
+  }
+
+  /* Small screens: nav shows brand only — the hero carries the CTAs.
+     Hero buttons go full-width, stacked, thumb-friendly.
+     NOTE: this block must sit AFTER the base .nav-actions rule —
+     same specificity means "last one written wins," and media
+     queries add no extra weight. (A cascade bug lived here once.) */
+  @media (max-width: 620px) {
+    .brand .tag { display: none; }
+    .nav-actions { display: none; }
+    .cta-row { flex-direction: column; }
+    .cta-row .btn { width: 100%; }
   }
 
   /* ================= HERO ================= */
