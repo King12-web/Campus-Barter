@@ -201,6 +201,9 @@
     font-size: 12px; font-weight: 600;
     border-radius: 10px; padding: 10px 12px; margin-bottom: 10px;
   }
+  .verify-banner {
+    display: flex; align-items: center; gap: 8px;
+  }
 
   /* ---- toast ---- */
   #toast {
@@ -294,7 +297,6 @@
   </div>
 </div>
 
-<!-- <script src="institution.js"></script> -->
 <script>
   /* ============================================================
      DEMO DATA
@@ -364,8 +366,22 @@
       viewInstitution = "University of Lagos";
       document.getElementById("profileBanner").innerHTML =
         '<div class="banner">You are browsing as a guest. ' +
-        'Open the onboarding page (campus-swap-onboarding.html) to join the board.</div>';
+        'Open the onboarding page (join.html) to join the board.</div>';
     }
+
+    /* signin.html flags an unverified sign-in with ?verify=1.
+       Friendly reminder, not a wall: they can still browse.
+       Trade actions will enforce verification once the
+       Trades page exists. */
+    if (new URLSearchParams(window.location.search).get("verify") === "1") {
+      document.getElementById("profileBanner").innerHTML +=
+        '<div class="banner verify-banner">' +
+        '<svg class="icon sm" viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9 22 2z"/></svg>' +
+        '<span>Verify your email to unlock proposing and accepting trades. ' +
+        'Check your inbox (and spam) for the link.</span>' +
+        '</div>';
+    }
+
     buildSwitcher();
     render();
   };

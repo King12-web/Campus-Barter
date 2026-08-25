@@ -9,7 +9,7 @@
 // from the Authorized Domains list and security rules.
 // ============================================================
 
-const firebaseConfig = {
+const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAc05ufittpBFVNXtv3tHW0QJX28CvF-Xs",
   authDomain: "campus-barter-c2a14.firebaseapp.com",
   projectId: "campus-barter-c2a14",
