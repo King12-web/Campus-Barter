@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Campus Swap — Exchange skills. Learn anything. Together.</title>
-<meta name="description" content="Campus Swap is a student-to-student platform where you trade skills, not money. Offer what you're good at. Get help with what you need." />
+<title>Campus Barter — Exchange skills. Learn anything. Together.</title>
+<meta name="description" content="Campus Barter is a student-to-student platform where you trade skills, not money. Offer what you're good at. Get help with what you need." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -58,10 +58,19 @@
     background: var(--primary-soft); color: var(--primary);
     display: flex; align-items: center; justify-content: center;
   }
-  .brand .name { font-size: 16px; font-weight: 800; letter-spacing: 0.01em; }
+  .brand .name { font-size: 16px; font-weight: 800; letter-spacing: 0.01em; white-space: nowrap; }
   .brand .name span { color: var(--primary); }
   .brand .tag { font-size: 10px; color: var(--muted); font-weight: 600; }
   .brand .tag b { color: var(--offer); font-weight: 600; }
+
+  /* Small screens: nav shows brand only — the hero carries the CTAs.
+     Hero buttons go full-width, stacked, thumb-friendly. */
+  @media (max-width: 620px) {
+    .brand .tag { display: none; }
+    .nav-actions { display: none; }
+    .cta-row { flex-direction: column; }
+    .cta-row .btn { width: 100%; }
+  }
 
   .nav-links { display: none; gap: 26px; }
   .nav-links a {
@@ -367,7 +376,7 @@
         <svg class="icon" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
       </div>
       <div>
-        <p class="name">CAMPUS <span>SWAP</span></p>
+        <p class="name">CAMPUS <span>BARTER</span></p>
         <p class="tag">Trade skills. <b>Grow together.</b></p>
       </div>
     </div>
@@ -375,7 +384,7 @@
     <div class="nav-links">
       <a href="#how">How it works</a>
       <a href="dashboard.html">Explore</a>
-      <a href="#why">Why Campus Swap</a>
+      <a href="#why">Why Campus Barter</a>
       <a href="#faq">FAQ</a>
     </div>
 
@@ -400,7 +409,7 @@
         </span>
       </h1>
       <p class="lede">
-        Campus Swap is a student-to-student platform where you trade
+        Campus Barter is a student-to-student platform where you trade
         skills, not money. Offer what you're good at. Get help with
         what you need.
       </p>
@@ -561,28 +570,28 @@
       <h2>Questions students ask</h2>
     </div>
 
-    <details>
-      <summary>Is Campus Swap free?
+    <details name="faq">
+      <summary>Is Campus Barter free?
         <svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </summary>
       <p>Completely. No fees, no subscriptions, no money anywhere in the app — that's the whole point. Your skills are the currency.</p>
     </details>
 
-    <details>
+    <details name="faq">
       <summary>How do we contact each other after a match?
         <svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </summary>
       <p>Through WhatsApp — where you already chat. Your number stays private until you accept a trade; then both of you get a chat button. Nobody can see or search your number on your profile.</p>
     </details>
 
-    <details>
+    <details name="faq">
       <summary>What if someone doesn't deliver their side?
         <svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </summary>
       <p>Every completed trade ends with both people rating each other, and ratings plus trade history show on every profile. Trade with people who deliver — reputations are earned, not claimed.</p>
     </details>
 
-    <details>
+    <details name="faq">
       <summary>Is my institution supported?
         <svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </summary>
