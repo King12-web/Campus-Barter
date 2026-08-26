@@ -93,7 +93,13 @@ async function getProfilesByInstitution(institutionName) {
     const snap = await getDocs(q);
     let people = [];
     snap.forEach(function (docSnap) {
-      people.push(docSnap.data());
+      /* docSnap.id IS the person's uid (that's what we keyed the
+         document by in saveProfile) but Firestore doesn't include
+         it inside .data() — we have to attach it ourselves, or
+         every "other person" object silently has no uid, which
+         breaks anything downstream that needs to identify them
+         (like proposing a trade). */
+      people.push(Object.assign({ uid: docSnap.id }, docSnap.data()));
     });
     return { ok: true, data: people };
   } catch (error) {
@@ -107,7 +113,9 @@ async function getAllProfiles() {
     const snap = await getDocs(collection(db, "profiles"));
     let people = [];
     snap.forEach(function (docSnap) {
-      people.push(docSnap.data());
+      /* same fix as getProfilesByInstitution: attach the doc id
+         as uid, since .data() alone never includes it. */
+      people.push(Object.assign({ uid: docSnap.id }, docSnap.data()));
     });
     return { ok: true, data: people };
   } catch (error) {

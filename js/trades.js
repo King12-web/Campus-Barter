@@ -50,6 +50,16 @@ function friendly(error) {
 
 /* ---- propose a new trade ---- */
 async function proposeTrade(proposer, receiver, offeredSkill, requestedSkill, terms) {
+  /* Guard against the exact bug that used to bite here: if either
+     uid is missing, Firestore rejects the whole write with a
+     cryptic "invalid-argument" (it doesn't allow undefined field
+     values). Catching it here gives a message that actually says
+     what's wrong instead of making someone debug a Firestore
+     error code. */
+  if (!proposer.uid || !receiver.uid) {
+    return { ok: false, message: "Missing account information — try refreshing the page." };
+  }
+
   try {
     const tradeDoc = {
       proposerUid: proposer.uid,
