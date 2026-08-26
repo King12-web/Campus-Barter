@@ -529,6 +529,13 @@
       return;
     }
 
+    /* Self-heal my own profile rating in the background — see the
+       big comment in trades.js for why this can only ever update
+       MY OWN rating, never someone else's, from the client. */
+    if (currentUser !== null && window.CBTrades !== undefined) {
+      CBTrades.recalcMyRating(currentUser.uid);
+    }
+
     let fetchPromise = viewInstitution === "__ALL__"
       ? CBDb.getAllProfiles()
       : CBDb.getProfilesByInstitution(viewInstitution);

@@ -142,6 +142,11 @@
       }
       render();
     });
+
+    /* Self-heal my own profile rating in the background — see
+       the big comment in trades.js for why it can only ever be
+       "my own" rating, never someone else's, from the client. */
+    CBTrades.recalcMyRating(currentUser.uid);
   }
 
   function switchTab(tab) {

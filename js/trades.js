@@ -142,12 +142,84 @@ async function rateTrade(tradeId, raterRole, stars) {
   }
 }
 
+/* ============================================================
+   RECALCULATING YOUR OWN RATING
+   ------------------------------------------------------------
+   Firestore rules only let you write YOUR OWN profile document
+   (request.auth.uid == userId) — on purpose, so nobody can
+   tamper with someone else's public stats. That means the person
+   who RATES a trade can't directly update the OTHER person's
+   profile; only that other person's own signed-in session can.
+
+   So instead of "rating instantly updates their profile", each
+   person recalculates and saves their OWN rating/trade count
+   whenever their own app loads — self-write only, fully rule-
+   compliant. Ratings appear on your profile the next time YOU
+   (the rated person) open the dashboard or trades page, not the
+   instant the other person submits the star rating. Honest
+   trade-off for a client-only build with no backend functions.
+   ============================================================ */
+async function recalcMyRating(uid) {
+  try {
+    const asProposer = query(collection(db, "trades"), where("proposerUid", "==", uid));
+    const asReceiver = query(collection(db, "trades"), where("receiverUid", "==", uid));
+    const results = await Promise.all([getDocs(asProposer), getDocs(asReceiver)]);
+
+    let completedCount = 0;
+    let ratingsReceived = [];
+
+    /* When I was the PROPOSER, the RECEIVER rated me —
+       that's stored in receiverRating. */
+    results[0].forEach(function (d) {
+      let data = d.data();
+      if (data.status === "completed") {
+        completedCount++;
+        if (data.receiverRating !== null && data.receiverRating !== undefined) {
+          ratingsReceived.push(data.receiverRating);
+        }
+      }
+    });
+
+    /* When I was the RECEIVER, the PROPOSER rated me —
+       that's stored in proposerRating. */
+    results[1].forEach(function (d) {
+      let data = d.data();
+      if (data.status === "completed") {
+        completedCount++;
+        if (data.proposerRating !== null && data.proposerRating !== undefined) {
+          ratingsReceived.push(data.proposerRating);
+        }
+      }
+    });
+
+    let avgRating = null;
+    if (ratingsReceived.length > 0) {
+      let sum = ratingsReceived.reduce(function (a, b) { return a + b; }, 0);
+      avgRating = Math.round((sum / ratingsReceived.length) * 10) / 10;
+    }
+
+    await updateDoc(doc(db, "profiles", uid), {
+      rating: avgRating,
+      trades: completedCount
+    });
+
+    return { ok: true, data: { rating: avgRating, trades: completedCount } };
+  } catch (error) {
+    /* Non-fatal on purpose: if this quietly fails, the rest of
+       the app should keep working — an out-of-date rating is a
+       much smaller problem than a broken page. */
+    console.error("Failed to recalculate rating:", error);
+    return { ok: false, message: friendly(error) };
+  }
+}
+
 window.CBTrades = {
   proposeTrade: proposeTrade,
   getMyTrades: getMyTrades,
   acceptTrade: acceptTrade,
   declineTrade: declineTrade,
   completeTrade: completeTrade,
-  rateTrade: rateTrade
+  rateTrade: rateTrade,
+  recalcMyRating: recalcMyRating
 };
 window.dispatchEvent(new Event("cbtrades-ready"));
