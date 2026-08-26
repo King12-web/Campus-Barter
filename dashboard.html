@@ -390,7 +390,7 @@
           <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add
         </button>
-        <button onclick="showToast('Trades page — coming soon')">
+        <button onclick="window.location.href='trades.html'">
           <svg class="icon" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
           Trades
         </button>
@@ -445,7 +445,7 @@
         <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add
       </button>
-      <button class="nav-item" onclick="showToast('Trades page — coming soon')">
+      <button class="nav-item" onclick="window.location.href='trades.html'">
         <svg class="icon" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         Trades
       </button>
@@ -455,10 +455,31 @@
       </button>
     </div>
   </nav>
+
+  <!-- ================= PROPOSE TRADE MODAL ================= -->
+  <div id="proposeOverlay" style="display:none; position:fixed; inset:0; background:rgba(4,56,115,0.45); z-index:300; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:var(--card); border-radius:16px; padding:20px; width:100%; max-width:380px; max-height:85vh; overflow-y:auto;">
+      <p style="font-family:'DM Sans',sans-serif; font-size:16px; font-weight:800; margin-bottom:14px;" id="proposeTitle">Propose a swap</p>
+
+      <label style="display:block; font-size:11px; font-weight:800; color:#0F6E56; margin-bottom:6px;">YOUR SKILL</label>
+      <select id="proposeOfferSelect" style="width:100%; border:1.5px solid var(--line); border-radius:9px; padding:11px; font-family:inherit; font-size:13px; margin-bottom:14px;"></select>
+
+      <label style="display:block; font-size:11px; font-weight:800; color:#A14E10; margin-bottom:6px;">THEIR SKILL</label>
+      <select id="proposeNeedSelect" style="width:100%; border:1.5px solid var(--line); border-radius:9px; padding:11px; font-family:inherit; font-size:13px; margin-bottom:14px;"></select>
+
+      <label style="display:block; font-size:11px; font-weight:800; color:var(--muted); margin-bottom:6px;">TERMS (OPTIONAL)</label>
+      <textarea id="proposeTerms" rows="2" placeholder="e.g. I'll redesign your CV, you fix my laptop." style="width:100%; border:1.5px solid var(--line); border-radius:9px; padding:11px; font-family:inherit; font-size:13px; resize:vertical; margin-bottom:6px;"></textarea>
+      <p class="error" id="proposeError" style="margin-bottom:10px;"></p>
+
+      <button class="btn btn-navy" id="proposeSendBtn" onclick="sendProposal()" style="margin-top:4px;">Send proposal</button>
+      <button class="btn" style="background:transparent; color:var(--muted); margin-top:8px;" onclick="closeProposeModal()">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <script type="module" src="js/auth.js"></script>
 <script type="module" src="js/db.js"></script>
+<script type="module" src="js/trades.js"></script>
 <script>
   let PEOPLE = [];
   let dataLoaded = false;
@@ -687,6 +708,7 @@
 
       if (matches.length > 0) {
         let m = matches[0].person;
+        window.__lastMatch = m;
         let youGive = overlap(currentUser.offers, m.needs);
         let youGet  = overlap(m.offers, currentUser.needs);
 
@@ -703,7 +725,7 @@
             "</div>" +
             '<p class="match-note">Your <b class="o">' + youGive[0] +
             '</b> for their <b class="n">' + youGet[0] + "</b></p>" +
-            '<button class="btn btn-navy" onclick="showToast(\'Proposal flow lands on the Trades page — next build\')">Propose trade</button>' +
+            '<button class="btn btn-navy" onclick="openProposeModal(window.__lastMatch)">Propose trade</button>' +
           "</div>";
       }
     }
@@ -727,6 +749,7 @@
     }
 
     let html = "";
+    window.__visiblePeople = visible;
     for (let i = 0; i < visible.length; i++) {
       let p = visible[i].person;
       let av = AV_CLASSES[i % AV_CLASSES.length];
@@ -747,10 +770,79 @@
             '<div class="skill-panel o"><p class="skill-panel-label">OFFERS</p><p class="skill-panel-list">' + offersLine + "</p></div>" +
             '<div class="skill-panel n"><p class="skill-panel-label">NEEDS</p><p class="skill-panel-list">' + needsLine + "</p></div>" +
           "</div>" +
-          '<button class="btn btn-outline" onclick="showToast(\'Proposal flow lands on the Trades page — next build\')">Propose swap</button>' +
+          '<button class="btn btn-outline" onclick="openProposeModal(window.__visiblePeople[' + i + '].person)">Propose swap</button>' +
         "</div>";
     }
     list.innerHTML = html;
+  }
+
+  let proposeTarget = null;
+
+  function openProposeModal(person) {
+    if (currentUser === null) {
+      showToast("Join the board first to propose a trade");
+      return;
+    }
+    proposeTarget = person;
+    document.getElementById("proposeTitle").textContent = "Propose a swap with " + person.name;
+    document.getElementById("proposeTerms").value = "";
+    document.getElementById("proposeError").style.display = "none";
+
+    let offerSel = document.getElementById("proposeOfferSelect");
+    offerSel.innerHTML = currentUser.offers.map(function (s) {
+      return '<option value="' + s + '">' + s + "</option>";
+    }).join("");
+
+    let needSel = document.getElementById("proposeNeedSelect");
+    needSel.innerHTML = person.offers.map(function (s) {
+      return '<option value="' + s + '">' + s + "</option>";
+    }).join("");
+
+    document.getElementById("proposeOverlay").style.display = "flex";
+  }
+
+  function closeProposeModal() {
+    document.getElementById("proposeOverlay").style.display = "none";
+    proposeTarget = null;
+  }
+
+  async function sendProposal() {
+    let errBox = document.getElementById("proposeError");
+    errBox.style.display = "none";
+
+    if (window.CBTrades === undefined) {
+      errBox.textContent = "Still connecting. Give it a second and try again.";
+      errBox.style.display = "block";
+      return;
+    }
+
+    let offeredSkill = document.getElementById("proposeOfferSelect").value;
+    let requestedSkill = document.getElementById("proposeNeedSelect").value;
+    let terms = document.getElementById("proposeTerms").value.trim();
+
+    if (offeredSkill === "" || requestedSkill === "") {
+      errBox.textContent = "Both skills are required to propose a trade.";
+      errBox.style.display = "block";
+      return;
+    }
+
+    let btn = document.getElementById("proposeSendBtn");
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+
+    let result = await CBTrades.proposeTrade(currentUser, proposeTarget, offeredSkill, requestedSkill, terms);
+
+    btn.disabled = false;
+    btn.textContent = "Send proposal";
+
+    if (result.ok === false) {
+      errBox.textContent = result.message;
+      errBox.style.display = "block";
+      return;
+    }
+
+    closeProposeModal();
+    showToast("Proposal sent to " + proposeTarget.name + ". Check the Trades page to track it.");
   }
 
   let toastTimer = null;

@@ -308,7 +308,7 @@
         <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         Only shared when you accept a trade. Never on your profile.
       </p>
-      <p class="error" id="waError">Enter a valid number (10 to 14 digits).</p>
+      <p class="error" id="waError">Enter a real Nigerian mobile number (e.g. 08012345678).</p>
 
       <button class="btn btn-navy" onclick="goToStep(3)">Continue</button>
       <button class="btn btn-ghost" onclick="goToStep(1)">Back</button>
@@ -2200,8 +2200,13 @@ const INSTITUTION_NAMES = INSTITUTIONS.map(function (i) { return i.name; });
         instError.style.display = "block"; ok = false;
       }
 
+      /* Real Nigerian mobile shape, not just "any 10-14 digits" —
+         catches obvious junk like 0000000000 at signup.
+         Accepts 0XXXXXXXXXX (11 digits) or 234XXXXXXXXXX (with
+         or without a leading +, digits already stripped). */
       let digits = whatsapp.value.replace(/\D/g, "");
-      if (digits.length < 10 || digits.length > 14) {
+      let nigerianShape = /^(0[7-9][0-1]\d{8}|234[7-9][0-1]\d{8})$/;
+      if (nigerianShape.test(digits) === false) {
         waError.style.display = "block"; ok = false;
       }
 
