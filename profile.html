@@ -96,6 +96,7 @@
 <script type="module" src="js/auth.js"></script>
 <script type="module" src="js/db.js"></script>
 <script type="module" src="js/trades.js"></script>
+<script type="module" src="js/activity.js"></script>
 <script>
   let currentUser = null;
 
@@ -245,6 +246,12 @@
     currentUser = Object.assign({}, currentUser, updates);
     localStorage.setItem("currentUser", JSON.stringify(currentUser));
     savedNote.style.display = "block";
+
+    /* fire-and-forget: log this so it shows up in Notifications
+       too, not just as this inline confirmation */
+    if (window.CBActivity !== undefined) {
+      CBActivity.logActivity(currentUser.uid, "Your profile changes were saved successfully.");
+    }
   }
 
   function handleSignOut() {

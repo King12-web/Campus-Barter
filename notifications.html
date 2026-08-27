@@ -75,6 +75,7 @@
 
 <script type="module" src="js/auth.js"></script>
 <script type="module" src="js/trades.js"></script>
+<script type="module" src="js/activity.js"></script>
 <script>
   /* ============================================================
      NOTIFICATIONS, DERIVED — NOT STORED
@@ -101,16 +102,21 @@
   };
 
   function loadFeed() {
-    if (window.CBTrades === undefined) {
+    if (window.CBTrades === undefined || window.CBActivity === undefined) {
       setTimeout(loadFeed, 200);
       return;
     }
-    CBTrades.getMyTrades(currentUser.uid).then(function (result) {
-      if (result.ok === false) {
-        document.getElementById("body").innerHTML = '<div class="empty">' + result.message + "</div>";
-        return;
-      }
-      render(result.data);
+    Promise.all([
+      CBTrades.getMyTrades(currentUser.uid),
+      CBActivity.getMyActivity(currentUser.uid)
+    ]).then(function (results) {
+      let tradesResult = results[0];
+      let activityResult = results[1];
+
+      let trades = tradesResult.ok ? tradesResult.data : [];
+      let activity = activityResult.ok ? activityResult.data : [];
+
+      render(trades, activity);
     });
   }
 
@@ -145,7 +151,8 @@
     match: '<svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
     check: '<svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
     x: '<svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
-    star: '<svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+    star: '<svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    settings: '<svg class="icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'
   };
 
   /* Turn one trade into zero or one feed entries, from MY point
@@ -187,11 +194,23 @@
     return null;
   }
 
-  function render(trades) {
+  function render(trades, activity) {
     let entries = [];
     for (let i = 0; i < trades.length; i++) {
       let entry = tradeToEntry(trades[i]);
       if (entry !== null) entries.push(entry);
+    }
+
+    /* activity entries plug straight into the same feed shape:
+       icon, text, time, href — one merged, sorted list. */
+    for (let i = 0; i < activity.length; i++) {
+      let a = activity[i];
+      entries.push({
+        icon: bellIcon("ni-green", ICONS.settings),
+        text: a.message,
+        time: a.createdAt,
+        href: "profile.html"
+      });
     }
 
     entries.sort(function (a, b) {
