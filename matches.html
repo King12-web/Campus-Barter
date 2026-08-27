@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Campus Barter | Matches</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --navy: #043873; --blue: #4F9CF9; --yellow: #FFE492; --yellow-deep: #FFD966;
+    --ink: #212529; --muted: #5B6470; --soft: #F7FAFD; --card: #FFFFFF; --line: #E3E9F0;
+    --offer: #16A34A; --offer-bg: #E8F7EE; --need: #F97316; --need-bg: #FEF0E6;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--soft); color: var(--ink);
+    display: flex; justify-content: center; min-height: 100vh;
+  }
+  h1, .btn { font-family: "DM Sans", "Inter", sans-serif; }
+  .icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: middle; flex-shrink: 0; }
+  .icon.sm { width: 15px; height: 15px; }
+
+  .app { width: 100%; max-width: 460px; display: flex; flex-direction: column; min-height: 100vh; }
+  @media (min-width: 900px) { .app { max-width: 900px; } }
+
+  .topbar { position: fixed; top: 0; left: 0; right: 0; background: var(--navy); color: #FFFFFF; z-index: 100; box-shadow: 0 2px 14px rgba(3,43,87,0.35); }
+  .topbar-inner { max-width: 460px; margin: 0 auto; display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+  @media (min-width: 900px) { .topbar-inner { max-width: 900px; } }
+  .topbar-inner a { color: #FFFFFF; display: flex; }
+  .topbar-inner .title { font-size: 16px; font-weight: 800; flex: 1; }
+  .page-spacer { height: 58px; }
+
+  .body { padding: 16px 14px 40px; flex: 1; }
+  @media (min-width: 900px) { .body { max-width: 900px; margin: 0 auto; } }
+
+  .toggle-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); color: var(--muted); cursor: pointer; }
+  .chip.on { background: var(--offer-bg); color: #0F6E56; border-color: transparent; }
+
+  .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 620px) { .grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); } }
+
+  .card { background: var(--card); border-radius: var(--radius); padding: 16px; border: 2px solid var(--navy); box-shadow: 0 10px 26px rgba(4,56,113,0.08); }
+  .swap-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 0 6px; }
+  .swap-person { text-align: center; font-size: 12.5px; font-weight: 700; }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; margin: 0 auto 6px; }
+  .av-a { background: var(--yellow); color: var(--navy); }
+  .av-b { background: #E1EEFE; color: var(--blue); }
+  .swap-mid { width: 34px; height: 34px; border-radius: 50%; background: var(--navy); color: #FFFFFF; display: flex; align-items: center; justify-content: center; }
+  .swap-mid .icon { width: 17px; height: 17px; }
+  .match-note { font-size: 12.5px; color: var(--muted); text-align: center; margin-bottom: 10px; }
+  .match-note b.o { color: var(--offer); }
+  .match-note b.n { color: var(--need); }
+  .meta { font-size: 11px; color: var(--muted); text-align: center; margin-bottom: 12px; }
+
+  .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; font-size: 13.5px; font-weight: 700; padding: 11px; border-radius: 10px; border: none; cursor: pointer; font-family: inherit; }
+  .btn-navy { background: var(--navy); color: #FFFFFF; }
+
+  .empty { text-align: center; color: var(--muted); font-size: 13.5px; padding: 40px 18px; background: var(--card); border-radius: var(--radius); border: 1px dashed var(--line); }
+  .empty .icon { width: 30px; height: 30px; margin-bottom: 10px; color: var(--blue); opacity: 0.5; }
+
+  #modalOverlay { display: none; position: fixed; inset: 0; background: rgba(4,56,115,0.45); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
+  #modalOverlay .modal-box { background: var(--card); border-radius: 16px; padding: 20px; width: 100%; max-width: 380px; }
+  #modalOverlay label { display: block; font-size: 11px; font-weight: 800; margin-bottom: 6px; }
+  #modalOverlay select, #modalOverlay textarea { width: 100%; border: 1.5px solid var(--line); border-radius: 9px; padding: 11px; font-family: inherit; font-size: 13px; margin-bottom: 14px; }
+  .error { font-size: 12px; color: #E11D48; display: none; margin-bottom: 8px; }
+
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: fit-content; max-width: 90%; background: var(--navy); color: #FFFFFF; font-size: 12.5px; font-weight: 600; padding: 11px 18px; border-radius: 999px; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 200; }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="dashboard.html" aria-label="Back to board">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </a>
+      <p class="title">Matches</p>
+    </div>
+  </header>
+  <div class="page-spacer"></div>
+
+  <div class="body">
+    <div class="toggle-row">
+      <button class="chip on" id="chipCampus" onclick="setScope('campus')">My campus</button>
+      <button class="chip" id="chipAll" onclick="setScope('all')">All campuses</button>
+    </div>
+    <div id="matchesList"><div class="empty">Loading your matches...</div></div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<div id="modalOverlay">
+  <div class="modal-box">
+    <p style="font-family:'DM Sans',sans-serif; font-size:16px; font-weight:800; margin-bottom:14px;" id="modalTitle">Propose a swap</p>
+    <label style="color:#0F6E56;">YOUR SKILL</label>
+    <select id="offerSelect"></select>
+    <label style="color:#A14E10;">THEIR SKILL</label>
+    <select id="needSelect"></select>
+    <label style="color:var(--muted);">TERMS (OPTIONAL)</label>
+    <textarea id="termsInput" rows="2" placeholder="e.g. I'll redesign your CV, you fix my laptop."></textarea>
+    <p class="error" id="modalError"></p>
+    <button class="btn btn-navy" id="sendBtn" onclick="sendProposal()">Send proposal</button>
+    <button class="btn" style="background:transparent; color:var(--muted); margin-top:8px;" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/db.js"></script>
+<script type="module" src="js/trades.js"></script>
+<script>
+  /* ============================================================
+     MATCHES — every match, not just the dashboard's single hero.
+     Reuses the exact same matcher logic (isMatch/overlap) so a
+     match here is guaranteed to mean the same thing everywhere
+     in the app — one algorithm, no drift between pages.
+     ============================================================ */
+
+  let currentUser = null;
+  let scope = "campus";
+  let allPeople = [];
+
+  window.onload = function () {
+    let stored = localStorage.getItem("currentUser");
+    if (stored === null) {
+      document.getElementById("matchesList").innerHTML =
+        '<div class="empty">Sign in to see your matches.</div>';
+      return;
+    }
+    currentUser = JSON.parse(stored);
+    loadMatches();
+  };
+
+  function setScope(s) {
+    scope = s;
+    document.getElementById("chipCampus").classList.toggle("on", s === "campus");
+    document.getElementById("chipAll").classList.toggle("on", s === "all");
+    loadMatches();
+  }
+
+  function loadMatches() {
+    if (window.CBDb === undefined) {
+      setTimeout(loadMatches, 200);
+      return;
+    }
+    document.getElementById("matchesList").innerHTML = '<div class="empty">Loading your matches...</div>';
+
+    let fetchPromise = scope === "all"
+      ? CBDb.getAllProfiles()
+      : CBDb.getProfilesByInstitution(currentUser.institution);
+
+    fetchPromise.then(function (result) {
+      allPeople = result.ok ? result.data : [];
+      render();
+    });
+  }
+
+  function isMatch(me, them) {
+    let theyHelpMe = them.offers.some(function (s) { return me.needs.includes(s); });
+    let iHelpThem = me.offers.some(function (s) { return them.needs.includes(s); });
+    return theyHelpMe && iHelpThem;
+  }
+
+  function overlap(offersA, needsB) {
+    return offersA.filter(function (s) { return needsB.includes(s); });
+  }
+
+  function initials(name) {
+    let parts = name.trim().split(" ");
+    let first = parts[0].charAt(0);
+    let second = parts.length > 1 ? parts[1].charAt(0) : "";
+    return (first + second).toUpperCase();
+  }
+
+  function render() {
+    let matches = allPeople.filter(function (p) {
+      return p.email !== currentUser.email && isMatch(currentUser, p);
+    });
+
+    let list = document.getElementById("matchesList");
+
+    if (matches.length === 0) {
+      list.innerHTML =
+        '<div class="empty"><svg class="icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' +
+        "<p>No matches here yet. Try \"All campuses\" or check back once more students join.</p></div>";
+      return;
+    }
+
+    let html = '<div class="grid">';
+    for (let i = 0; i < matches.length; i++) {
+      let m = matches[i];
+      let youGive = overlap(currentUser.offers, m.needs);
+      let youGet = overlap(m.offers, currentUser.needs);
+      html +=
+        '<div class="card">' +
+          '<div class="swap-row">' +
+            '<div class="swap-person"><div class="avatar av-a">' + initials(currentUser.name) + "</div>You</div>" +
+            '<div class="swap-mid"><svg class="icon" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>' +
+            '<div class="swap-person"><div class="avatar av-b">' + initials(m.name) + "</div>" + m.name + "</div>" +
+          "</div>" +
+          '<p class="match-note">Your <b class="o">' + youGive[0] + '</b> for their <b class="n">' + youGet[0] + "</b></p>" +
+          '<p class="meta">' + m.institution + "</p>" +
+          '<button class="btn btn-navy" onclick="openModal(' + i + ')">Propose trade</button>' +
+        "</div>";
+    }
+    html += "</div>";
+    list.innerHTML = html;
+    window.__currentMatches = matches;
+  }
+
+  let modalTarget = null;
+
+  function openModal(index) {
+    modalTarget = window.__currentMatches[index];
+    document.getElementById("modalTitle").textContent = "Propose a swap with " + modalTarget.name;
+    document.getElementById("termsInput").value = "";
+    document.getElementById("modalError").style.display = "none";
+
+    document.getElementById("offerSelect").innerHTML = currentUser.offers.map(function (s) {
+      return '<option value="' + s + '">' + s + "</option>";
+    }).join("");
+    document.getElementById("needSelect").innerHTML = modalTarget.offers.map(function (s) {
+      return '<option value="' + s + '">' + s + "</option>";
+    }).join("");
+
+    document.getElementById("modalOverlay").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("modalOverlay").style.display = "none";
+    modalTarget = null;
+  }
+
+  async function sendProposal() {
+    let errBox = document.getElementById("modalError");
+    errBox.style.display = "none";
+
+    if (window.CBTrades === undefined) {
+      errBox.textContent = "Still connecting. Try again in a moment.";
+      errBox.style.display = "block";
+      return;
+    }
+
+    let offeredSkill = document.getElementById("offerSelect").value;
+    let requestedSkill = document.getElementById("needSelect").value;
+    let terms = document.getElementById("termsInput").value.trim();
+
+    let btn = document.getElementById("sendBtn");
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+
+    let result = await CBTrades.proposeTrade(currentUser, modalTarget, offeredSkill, requestedSkill, terms);
+
+    btn.disabled = false;
+    btn.textContent = "Send proposal";
+
+    if (result.ok === false) {
+      errBox.textContent = result.message;
+      errBox.style.display = "block";
+      return;
+    }
+
+    closeModal();
+    showToast("Proposal sent to " + modalTarget.name + ". Track it on My Trades.");
+  }
+
+  let toastTimer = null;
+  function showToast(message) {
+    let t = document.getElementById("toast");
+    t.textContent = message;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("show"); }, 2400);
+  }
+</script>
+</body>
+</html>
